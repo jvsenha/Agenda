@@ -3,19 +3,25 @@ package br.com.agenda.Controller;
 import br.com.agenda.DTO.ConsultaRequest;
 import br.com.agenda.DTO.ConsultaResponse;
 import br.com.agenda.Service.ConsultaService;
+import br.com.agenda.Service.MedicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/consultas")
+@RequestMapping("/api/consultas")
 public class ConsultaController {
 
     @Autowired
     private ConsultaService consultaService;
+
+    @Autowired
+    private MedicoService medicoService;
 
     @PostMapping("/cadastrar")
     public ResponseEntity<ConsultaResponse> criarConsulta(@RequestBody ConsultaRequest consultaRequest) {
@@ -44,9 +50,5 @@ public class ConsultaController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<Void> deletarConsulta(@PathVariable Long id) {
-        consultaService.deletar(id);
-        return ResponseEntity.noContent().build();
-    }
+
 }

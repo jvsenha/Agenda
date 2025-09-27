@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Consultas</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .container { display: flex; width: 80%; gap: 20px; }
+        .section { flex: 1; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input, select, button { padding: 8px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<h1>Gerenciamento de Consultas</h1>
+<a th:href="@{/}" style="margin-bottom: 20px;">Voltar para a Home</a> <div class="container">
+</div>
+
+<div class="container">
+    <div class="section">
+        <h2 th:text="${consultaForm.id != null ? 'Editar Consulta' : 'Agendar Consulta'}">Agendar Consulta</h2>
+        <form th:action="@{/consultas/view/salvar}" th:object="${consultaForm}" method="post">
+
+            <!-- ID escondido para edição -->
+            <input type="hidden" th:field="*{id}" />
+
+            <!-- Nome do Paciente -->
+            <input type="text" th:field="*{paciente}" placeholder="Nome do Paciente" required />
+
+            <!-- Data/Hora da Consulta (corrigido) -->
+            <input type="datetime-local"
+                   th:field="*{dataConsulta}"
+                   th:value="${consultaForm.dataConsulta != null ? #temporals.format(consultaForm.dataConsulta, 'yyyy-MM-dd''T''HH:mm') : ''}" />
+
+            <!-- Observações -->
+            <input type="text" th:field="*{observacoes}" placeholder="Observações" />
+
+            <!-- Seleção de Médico -->
+            <select th:field="*{medicoId}" required>
+                <option value="">Selecione um Médico</option>
+                <option th:each="medico : ${listaDeMedicos}"
+                        th:value="${medico.id}"
+                        th:text="${medico.nome}">
+                </option>
+            </select>
+
+            <!-- Botão -->
+            <button type="submit">Salvar</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Consultas Agendadas</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Médico</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="consulta : ${listaDeConsultas}">
+                <td th:text="${consulta.paciente}"></td>
+                <td th:text="${#temporals.format(consulta.dataConsulta, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${consulta.medicoNome}"></td>
+                <td>
+                    <a th:href="@{/consultas/view/editar/{id}(id=${consulta.id})}">Editar</a> |
+                    <a th:href="@{/consultas/view/deletar/{id}(id=${consulta.id})}">Excluir</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

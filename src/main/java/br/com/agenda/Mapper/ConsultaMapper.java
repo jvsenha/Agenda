@@ -13,6 +13,12 @@ public class ConsultaMapper {
         response.setDataConsulta(entity.getDataConsulta());
         response.setPaciente(entity.getPaciente());
         response.setObservacoes(entity.getObservacoes());
+
+        if (entity.getMedico() != null) {
+            response.setMedicoNome(entity.getMedico().getNome());
+            response.setMedicoId(entity.getMedico().getId()); // <-- Adicione esta linha
+        }
+
         return response;
     }
 

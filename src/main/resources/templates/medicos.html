@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Médicos</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .container { display: flex; width: 80%; gap: 20px; }
+        .section { flex: 1; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        .full-width { width: 80%; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input, button { padding: 8px; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<h1>Gerenciamento de Médicos</h1>
+<a th:href="@{/}" style="margin-bottom: 20px;">Voltar para a Home</a> <div class="container">
+</div>
+
+<div class="container">
+    <div class="section">
+        <h2 th:text="${medicoForm.id != null ? 'Editar Médico' : 'Cadastrar Médico'}">Cadastrar Médico</h2>
+        <form th:action="@{/medicos/view/salvar}" th:object="${medicoForm}" method="post">
+            <input type="hidden" th:field="*{id}" />
+            <input type="text" th:field="*{nome}" placeholder="Nome do Médico" required />
+            <input type="text" th:field="*{especialidade}" placeholder="Especialidade" required />
+            <button type="submit">Salvar</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Médicos Cadastrados</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Especialidade</th>
+                <th>Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="medico : ${listaDeMedicos}">
+                <td th:text="${medico.nome}">Nome do Médico</td>
+                <td th:text="${medico.especialidade}">Especialidade</td>
+                <td>
+                    <a th:href="@{/medicos/view/editar/{id}(id=${medico.id})}">Alterar</a> |
+                    <a th:href="@{/medicos/view/deletar/{id}(id=${medico.id})}" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="full-width">
+    <h2>Agenda Completa</h2>
+    <div th:each="agenda : ${agendaCompleta}" th:if="${not #lists.isEmpty(agenda.consultas)}">
+        <h3 th:text="${agenda.nomeMedico} + ' - ' + ${agenda.especialidade}">Nome e Especialidade</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Observações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="consulta : ${agenda.consultas}">
+                <td th:text="${consulta.paciente}">Nome do Paciente</td>
+                <td th:text="${#temporals.format(consulta.dataConsulta, 'dd/MM/yyyy HH:mm')}">Data da Consulta</td>
+                <td th:text="${consulta.observacoes}">Observações</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
