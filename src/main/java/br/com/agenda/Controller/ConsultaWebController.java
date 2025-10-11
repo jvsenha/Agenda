@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/consultas/view") // Dedicated path for the web page
+@RequestMapping("/consultas/view")
 public class ConsultaWebController {
 
     @Autowired

@@ -16,7 +16,7 @@ public class ConsultaMapper {
 
         if (entity.getMedico() != null) {
             response.setMedicoNome(entity.getMedico().getNome());
-            response.setMedicoId(entity.getMedico().getId()); // <-- Adicione esta linha
+            response.setMedicoId(entity.getMedico().getId());
         }
 
         return response;

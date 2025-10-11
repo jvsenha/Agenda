@@ -30,7 +30,7 @@ public class MedicoMapper {
         dto.setNomeMedico(entity.getNome());
         dto.setEspecialidade(entity.getEspecialidade());
         dto.setConsultas(entity.getConsultas().stream()
-                .map(ConsultaMapper::toResponseDTO) // Reutiliza o mapper de consulta
+                .map(ConsultaMapper::toResponseDTO)
                 .collect(Collectors.toList()));
         return dto;
     }

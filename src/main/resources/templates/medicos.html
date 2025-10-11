@@ -2,83 +2,489 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Médicos</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .container { display: flex; width: 80%; gap: 20px; }
-        .section { flex: 1; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        .full-width { width: 80%; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
-        form { display: flex; flex-direction: column; gap: 10px; }
-        input, button { padding: 8px; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1400px;
+            min-height: 700px;
+            display: flex;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #1e88e5 0%, #1565c0 100%);
+            width: 280px;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 0 30px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        .welcome-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .user-name {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            fill: currentColor;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background: #f8fafc;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .back-link {
+            color: #1e88e5;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(30, 136, 229, 0.1);
+        }
+
+        .back-link:hover {
+            background: rgba(30, 136, 229, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .card-header {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #1e88e5;
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 136, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: #f8fafc;
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .table td {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #6b7280;
+        }
+
+        .table tr:hover {
+            background: #f8fafc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 8px;
+        }
+
+        .agenda-section {
+            margin-top: 30px;
+        }
+
+        .medico-agenda {
+            margin-bottom: 30px;
+        }
+
+        .medico-header {
+            background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+                min-height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px 0;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
+<div class="dashboard">
+    <div class="sidebar">
+        <div class="profile-section">
+            <div class="profile-avatar">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+            </div>
+            <div class="welcome-text">Bem-vindo</div>
+            <div class="user-name">Sistema de Clínica</div>
+        </div>
 
-<h1>Gerenciamento de Médicos</h1>
-<a th:href="@{/}" style="margin-bottom: 20px;">Voltar para a Home</a> <div class="container">
-</div>
-
-<div class="container">
-    <div class="section">
-        <h2 th:text="${medicoForm.id != null ? 'Editar Médico' : 'Cadastrar Médico'}">Cadastrar Médico</h2>
-        <form th:action="@{/medicos/view/salvar}" th:object="${medicoForm}" method="post">
-            <input type="hidden" th:field="*{id}" />
-            <input type="text" th:field="*{nome}" placeholder="Nome do Médico" required />
-            <input type="text" th:field="*{especialidade}" placeholder="Especialidade" required />
-            <button type="submit">Salvar</button>
-        </form>
+        <nav class="nav-menu">
+            <a th:href="@{/}" class="nav-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Dashboard
+            </a>
+            <a href="#" class="nav-item active">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                </svg>
+                Gerenciar Médicos
+            </a>
+            <a th:href="@{/consultas/view}" class="nav-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                </svg>
+                Gerenciar Consultas
+            </a>
+            <a href="#" class="nav-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                Relatórios
+            </a>
+            <a href="#" class="nav-item">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+                Configurações
+            </a>
+        </nav>
     </div>
 
-    <div class="section">
-        <h2>Médicos Cadastrados</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Nome</th>
-                <th>Especialidade</th>
-                <th>Ações</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="medico : ${listaDeMedicos}">
-                <td th:text="${medico.nome}">Nome do Médico</td>
-                <td th:text="${medico.especialidade}">Especialidade</td>
-                <td>
-                    <a th:href="@{/medicos/view/editar/{id}(id=${medico.id})}">Alterar</a> |
-                    <a th:href="@{/medicos/view/deletar/{id}(id=${medico.id})}" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Gerenciamento de Médicos</h1>
+            <a th:href="@{/}" class="back-link">← Voltar para a Home</a>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" th:text="${medicoForm.id != null ? 'Editar Médico' : 'Cadastrar Médico'}">Cadastrar Médico</h2>
+                </div>
+
+                <form th:action="@{/medicos/view/salvar}" th:object="${medicoForm}" method="post">
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Nome do Médico</label>
+                            <input type="text" th:field="*{nome}" class="form-input" placeholder="Digite o nome completo" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Especialidade</label>
+                            <input type="text" th:field="*{especialidade}" class="form-input" placeholder="Digite a especialidade" required />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Médico</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Médicos Cadastrados</h2>
+                </div>
+
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Especialidade</th>
+                            <th>Ações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="medico : ${listaDeMedicos}">
+                            <td th:text="${medico.nome}">Nome do Médico</td>
+                            <td th:text="${medico.especialidade}">Especialidade</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a th:href="@{/medicos/view/editar/{id}(id=${medico.id})}" class="btn btn-sm btn-secondary">Alterar</a>
+                                    <a th:href="@{/medicos/view/deletar/{id}(id=${medico.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir?')">Excluir</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card agenda-section">
+            <div class="card-header">
+                <h2 class="card-title">Agenda Completa</h2>
+            </div>
+
+            <div th:each="agenda : ${agendaCompleta}" th:if="${not #lists.isEmpty(agenda.consultas)}" class="medico-agenda">
+                <div class="medico-header" th:text="${agenda.nomeMedico} + ' - ' + ${agenda.especialidade}">Nome e Especialidade</div>
+                <div class="table-container" style="border-radius: 0 0 15px 15px;">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Data</th>
+                            <th>Observações</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="consulta : ${agenda.consultas}">
+                            <td th:text="${consulta.paciente}">Nome do Paciente</td>
+                            <td th:text="${#temporals.format(consulta.dataConsulta, 'dd/MM/yyyy HH:mm')}">Data da Consulta</td>
+                            <td th:text="${consulta.observacoes}">Observações</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="full-width">
-    <h2>Agenda Completa</h2>
-    <div th:each="agenda : ${agendaCompleta}" th:if="${not #lists.isEmpty(agenda.consultas)}">
-        <h3 th:text="${agenda.nomeMedico} + ' - ' + ${agenda.especialidade}">Nome e Especialidade</h3>
-        <table>
-            <thead>
-            <tr>
-                <th>Paciente</th>
-                <th>Data</th>
-                <th>Observações</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="consulta : ${agenda.consultas}">
-                <td th:text="${consulta.paciente}">Nome do Paciente</td>
-                <td th:text="${#temporals.format(consulta.dataConsulta, 'dd/MM/yyyy HH:mm')}">Data da Consulta</td>
-                <td th:text="${consulta.observacoes}">Observações</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
 </body>
 </html>
