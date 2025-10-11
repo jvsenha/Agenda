@@ -312,6 +312,18 @@
                 </svg>
                 Gerenciar Consultas
             </a>
+            <a th:href="@{/consultas/view}" class="nav-item">
+                Gerenciar Consultas
+            </a>
+
+            <form th:action="@{/logout}" method="post" style="margin-top: auto; padding: 0 20px 20px 20px;">
+                <button type="submit" class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left;">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                    </svg>
+                    Sair do Sistema
+                </button>
+            </form>
         </nav>
     </div>
 
