@@ -2,9 +2,11 @@ package br.com.agenda.Controller;
 
 import br.com.agenda.DTO.PacienteDTO;
 import br.com.agenda.Service.PacienteService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -25,7 +27,12 @@ public class PacienteWebController {
     }
 
     @PostMapping("/salvar")
-    public String savePaciente(@ModelAttribute("pacienteForm") PacienteDTO pacienteDTO) {
+    public String savePaciente(@ModelAttribute("pacienteForm") @Valid PacienteDTO pacienteDTO, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("listaDePacientes", pacienteService.listarTodos());
+            return "pacientes";
+        }
+
         if (pacienteDTO.getId() != null) {
             pacienteService.atualizar(pacienteDTO.getId(), pacienteDTO);
         } else {
@@ -37,11 +44,8 @@ public class PacienteWebController {
     @GetMapping("/editar/{id}")
     public String showEditForm(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         pacienteService.buscarPorId(id).ifPresent(paciente -> {
-            PacienteDTO form = new PacienteDTO();
-            form.setId(paciente.getId());
-            form.setNome(paciente.getNome());
-            form.setCpf(paciente.getCpf());
-            redirectAttributes.addFlashAttribute("pacienteForm", form);
+            // Fix: All fields are automatically populated by Thymeleaf on redirect
+            redirectAttributes.addFlashAttribute("pacienteForm", paciente);
         });
         return "redirect:/pacientes/view";
     }

@@ -1,10 +1,9 @@
 package br.com.agenda.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -18,4 +17,13 @@ public class PacienteEntity {
     private String cpf;
     private String telefone;
     private String email;
+
+    // NOVO: Relação N:N com ExameEntity.
+    @ManyToMany
+    @JoinTable(
+            name = "paciente_exame", // Nome da tabela de junção
+            joinColumns = @JoinColumn(name = "paciente_id"),
+            inverseJoinColumns = @JoinColumn(name = "exame_id")
+    )
+    private List<ExameEntity> exames;
 }
