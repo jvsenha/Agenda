@@ -26,15 +26,21 @@ public class AgendamentoExameService {
     }
 
     public void salvar(AgendamentoExameDTO dto) {
-        AgendamentoExameEntity entity = new AgendamentoExameEntity();
-        if (dto.getId() != null) entity.setId(dto.getId()); // Atualização
-
+        // ... (código de busca de paciente e exame permanece igual) ...
         PacienteEntity paciente = pacienteRepository.findById(dto.getPacienteId())
                 .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
         ExameEntity exame = exameRepository.findById(dto.getExameId())
                 .orElseThrow(() -> new EntityNotFoundException("Exame não encontrado"));
 
+        // NOVO: Validação de Duplicidade
+        if (repository.existsByPacienteAndExameAndDataExame(paciente, exame, dto.getDataExame())) {
+            throw new IllegalArgumentException("Erro: Este paciente já possui este exame agendado para o mesmo horário.");
+        }
+
+        // ... (restante do código de salvar) ...
+        AgendamentoExameEntity entity = new AgendamentoExameEntity();
+        if (dto.getId() != null) entity.setId(dto.getId());
         entity.setPaciente(paciente);
         entity.setExame(exame);
         entity.setDataExame(dto.getDataExame());

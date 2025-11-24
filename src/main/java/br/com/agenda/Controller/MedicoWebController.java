@@ -28,17 +28,26 @@ public class MedicoWebController {
     }
 
     @PostMapping("/salvar")
-    public String saveMedico(@ModelAttribute("medicoForm") @Valid MedicoRequest medicoRequest, BindingResult result, Model model) {
+    public String saveMedico(@ModelAttribute("medicoForm") @Valid MedicoRequest medicoRequest,
+                             BindingResult result,
+                             Model model,
+                             RedirectAttributes redirectAttributes) { // Adicionar RedirectAttributes
+
         if (result.hasErrors()) {
             model.addAttribute("listaDeMedicos", medicoService.listarTodos());
             model.addAttribute("agendaCompleta", medicoService.getAgendaCompleta());
-            return "medicos"; // Retorna para a mesma página para mostrar erros
+            return "medicos";
         }
 
-        if (medicoRequest.getId() != null) {
-            medicoService.atualizar(medicoRequest.getId(), medicoRequest);
-        } else {
-            medicoService.salvar(medicoRequest);
+        try {
+            if (medicoRequest.getId() != null) {
+                medicoService.atualizar(medicoRequest.getId(), medicoRequest);
+            } else {
+                medicoService.salvar(medicoRequest);
+            }
+        } catch (IllegalArgumentException e) {
+            // CAPTURA O ERRO DE DUPLICIDADE
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/medicos/view";
     }

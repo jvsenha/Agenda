@@ -5,6 +5,7 @@ import br.com.agenda.Service.ExameService; // Import necessário
 import br.com.agenda.Service.PacienteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -34,17 +35,27 @@ public class PacienteWebController {
     }
 
     @PostMapping("/salvar")
-    public String savePaciente(@ModelAttribute("pacienteForm") @Valid PacienteDTO pacienteDTO, BindingResult result, Model model) {
+    public String savePaciente(@ModelAttribute("pacienteForm") @Valid PacienteDTO pacienteDTO,
+                               BindingResult result,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+
         if (result.hasErrors()) {
             model.addAttribute("listaDePacientes", pacienteService.listarTodos());
             return "pacientes";
         }
 
-        if (pacienteDTO.getId() != null) {
-            pacienteService.atualizar(pacienteDTO.getId(), pacienteDTO);
-        } else {
-            pacienteService.salvar(pacienteDTO);
+        try {
+            if (pacienteDTO.getId() != null) {
+                pacienteService.atualizar(pacienteDTO.getId(), pacienteDTO);
+            } else {
+                pacienteService.salvar(pacienteDTO);
+            }
+        } catch (DataIntegrityViolationException e) {
+            // Captura erro de duplicidade (CPF ou Email)
+            redirectAttributes.addFlashAttribute("errorMessage", "Erro: CPF ou Email já cadastrado no sistema.");
         }
+
         return "redirect:/pacientes/view";
     }
 

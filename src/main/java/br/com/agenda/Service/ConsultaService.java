@@ -45,13 +45,17 @@ public class ConsultaService {
         MedicoEntity medico = medicoRepository.findById(consultaRequest.getMedicoId())
                 .orElseThrow(() -> new EntityNotFoundException("Médico não encontrado"));
 
-        // CORREÇÃO: Busca o paciente real
         PacienteEntity paciente = pacienteRepository.findById(consultaRequest.getPacienteId())
                 .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
-        // CORREÇÃO: Validação de conflito de horário
+        // 1. Valida Médico Ocupado
         if (consultaRepository.existsByMedicoAndDataConsulta(medico, consultaRequest.getDataConsulta())) {
-            throw new IllegalArgumentException("Este médico já possui uma consulta agendada para este horário.");
+            throw new IllegalArgumentException("Conflito: O Médico já possui agendamento neste horário.");
+        }
+
+        // 2. NOVO: Valida Paciente Ocupado (ou consulta duplicada)
+        if (consultaRepository.existsByPacienteAndDataConsulta(paciente, consultaRequest.getDataConsulta())) {
+            throw new IllegalArgumentException("Conflito: O Paciente já possui uma consulta agendada neste horário.");
         }
 
         ConsultaEntity consultaEntity = ConsultaMapper.toEntity(consultaRequest, medico, paciente);
@@ -70,9 +74,13 @@ public class ConsultaService {
                 .orElseThrow(() -> new EntityNotFoundException("Paciente não encontrado"));
 
         // Verifica conflito apenas se a data mudou
-        if (!consultaEntity.getDataConsulta().isEqual(consultaRequest.getDataConsulta()) &&
-                consultaRepository.existsByMedicoAndDataConsulta(medico, consultaRequest.getDataConsulta())) {
-            throw new IllegalArgumentException("Conflito de horário: O médico já possui agendamento.");
+        if (!consultaEntity.getDataConsulta().isEqual(consultaRequest.getDataConsulta())) {
+            if (consultaRepository.existsByMedicoAndDataConsulta(medico, consultaRequest.getDataConsulta())) {
+                throw new IllegalArgumentException("Médico indisponível neste horário.");
+            }
+            if (consultaRepository.existsByPacienteAndDataConsulta(paciente, consultaRequest.getDataConsulta())) {
+                throw new IllegalArgumentException("Paciente já possui compromisso neste horário.");
+            }
         }
 
         consultaEntity.setPaciente(paciente);

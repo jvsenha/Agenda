@@ -3,6 +3,7 @@ package br.com.agenda.Controller;
 import br.com.agenda.DTO.ExameDTO;
 import br.com.agenda.Service.ExameService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,16 @@ public class ExameWebController {
     }
 
     @PostMapping("/salvar")
-    public String saveExame(@ModelAttribute("exameForm") ExameDTO exameDTO) {
-        if (exameDTO.getId() != null) {
-            exameService.atualizar(exameDTO.getId(), exameDTO);
-        } else {
-            exameService.salvar(exameDTO);
+    public String saveExame(@ModelAttribute("exameForm") ExameDTO exameDTO, RedirectAttributes redirectAttributes) {
+        try {
+            if (exameDTO.getId() != null) {
+                exameService.atualizar(exameDTO.getId(), exameDTO);
+            } else {
+                exameService.salvar(exameDTO);
+            }
+        } catch (DataIntegrityViolationException e) {
+            // Captura erro de chave única do banco (Nome duplicado)
+            redirectAttributes.addFlashAttribute("errorMessage", "Erro: Já existe um exame cadastrado com este nome.");
         }
         return "redirect:/exames/view";
     }

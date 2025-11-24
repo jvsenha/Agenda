@@ -33,6 +33,11 @@ public class MedicoService {
     }
 
     public MedicoResponse salvar(MedicoRequest medicoRequest) {
+        // VALIDAÇÃO: Verifica duplicidade antes de salvar
+        if (medicoRepository.existsByNomeAndEspecialidade(medicoRequest.getNome(), medicoRequest.getEspecialidade())) {
+            throw new IllegalArgumentException("Já existe um médico cadastrado com este nome e especialidade.");
+        }
+
         MedicoEntity medicoEntity = MedicoMapper.toEntity(medicoRequest);
         MedicoEntity medicoSalvo = medicoRepository.save(medicoEntity);
         return MedicoMapper.toResponseDTO(medicoSalvo);
@@ -52,6 +57,16 @@ public class MedicoService {
     public MedicoResponse atualizar(Long id, MedicoRequest medicoRequest) {
         MedicoEntity medicoEntity = medicoRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Médico não encontrado com o ID: " + id));
+
+        // Validação na atualização: Se mudou dados, verifica se conflita com outro
+        if (!medicoEntity.getNome().equals(medicoRequest.getNome()) ||
+                !medicoEntity.getEspecialidade().equals(medicoRequest.getEspecialidade())) {
+
+            if (medicoRepository.existsByNomeAndEspecialidade(medicoRequest.getNome(), medicoRequest.getEspecialidade())) {
+                throw new IllegalArgumentException("Já existe outro médico com estes dados.");
+            }
+        }
+
         medicoEntity.setNome(medicoRequest.getNome());
         medicoEntity.setEspecialidade(medicoRequest.getEspecialidade());
         MedicoEntity medicoAtualizado = medicoRepository.save(medicoEntity);

@@ -72,7 +72,9 @@
       <h1 class="page-title">Gerenciamento de Pacientes</h1>
       <a th:href="@{/}" class="back-link">← Voltar para a Home</a>
     </div>
-
+    <div th:if="${errorMessage}" style="background-color: #fee2e2; color: #dc2626; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #fca5a5;">
+      <span th:text="${errorMessage}"></span>
+    </div>
     <div class="dashboard-grid">
       <div class="card">
         <div class="card-header">

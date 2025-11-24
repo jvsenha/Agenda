@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/agendamento-exames")
@@ -28,12 +29,23 @@ public class AgendamentoExameController {
 
     @PostMapping("/salvar")
     public String salvar(@ModelAttribute("agendamentoForm") @Valid AgendamentoExameDTO dto,
-                         BindingResult result, Model model) {
+                         BindingResult result,
+                         Model model,
+                         RedirectAttributes redirectAttributes) { // Adicionar RedirectAttributes
+
         if (result.hasErrors()) {
+            // Método auxiliar que você já tinha para carregar as listas
             carregarListas(model);
             return "agendamento-exames";
         }
-        service.salvar(dto);
+
+        try {
+            service.salvar(dto);
+        } catch (IllegalArgumentException e) {
+            // Captura o erro de validação criado no Service
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
         return "redirect:/agendamento-exames";
     }
 
