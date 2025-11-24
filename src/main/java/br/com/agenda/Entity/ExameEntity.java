@@ -1,6 +1,7 @@
 package br.com.agenda.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
@@ -13,10 +14,14 @@ public class ExameEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Nome do exame é obrigatório")
+    @Column(unique = true, nullable = false)
     private String nome;
+
+    @NotBlank(message = "Tipo do exame é obrigatório")
+    @Column(nullable = false)
     private String tipo;
 
-    // Relação N:N com PacienteEntity. Mapeia o lado "invés" da relação.
     @ManyToMany(mappedBy = "exames")
     private List<PacienteEntity> pacientes;
 }

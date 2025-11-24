@@ -12,8 +12,8 @@ public class ConsultaRequest {
     @NotNull(message = "A data da consulta é obrigatória")
     private LocalDateTime dataConsulta;
 
-    @NotBlank(message = "O nome do paciente é obrigatório")
-    private String paciente;
+    @NotNull(message = "O paciente é obrigatório")
+    private Long pacienteId;
 
     private String observacoes;
 
